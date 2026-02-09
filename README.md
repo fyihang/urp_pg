@@ -24,7 +24,7 @@
 1. 克隆项目到本地
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/dygzn/urp_pg.git
 cd urp_jxpg
 ```
 
