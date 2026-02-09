@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 ## 使用方法
-
+main.py为经过优化但没有测试的版本，教学评估.py是没有优化但是肯定可用的完整版本
 1. 打开 `main.py` 文件
 
 2. 在文件末尾填入你的学号和密码：
