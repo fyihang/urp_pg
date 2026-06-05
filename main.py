@@ -120,7 +120,56 @@ class URPClient:
             "pgnr": evaluation_content,
             "oper": "wjShow"
         }
-        self.session.post(url, data=data, headers=headers1)
+        response_html = self.session.post(url, data=data, headers=headers1).text
+        soup = BeautifulSoup(response_html, 'html.parser')
+
+        # 从问卷页面动态解析题目 ID 和选项
+        evaluation_data = {
+            'wjbm': questionnaire_id,
+            'bpr': evaluatee_id,
+            'pgnr': evaluation_content,
+            'xumanyzg': 'zg',
+            'wjbz': '',
+            'zgpj': ''
+        }
+
+        for tr in soup.find_all('tr'):
+            # 找到题目所在的行，获取题目 ID
+            input_tags = tr.find_all('input')
+            question_ids = []
+            options = []
+
+            for inp in input_tags:
+                name = inp.get('name', '')
+                inp_type = inp.get('type', 'text')
+                value = inp.get('value', '')
+                # 题目 ID 是类似 0000000138 的纯数字 name
+                if name.isdigit():
+                    if name not in question_ids:
+                        question_ids.append(name)
+                    if inp_type == 'radio' or inp_type == 'checkbox':
+                        options.append((name, value))
+
+            # 处理同一题目的单选：选最高分
+            if question_ids:
+                for qid in question_ids:
+                    if qid not in evaluation_data:
+                        q_options = [(n, v) for n, v in options if n == qid]
+                        if q_options:
+                            # 选最高分选项
+                            best = max(q_options, key=lambda x: float(x[1].split('_')[0]) if '_' in x[1] else 0)
+                            evaluation_data[qid] = best[1]
+
+        # 检查是否还有未填充的题目（textarea、hidden 等）
+        for inp in soup.find_all(['input', 'textarea']):
+            name = inp.get('name', '')
+            if name.isdigit() and name not in evaluation_data:
+                inp_type = inp.get('type', 'text')
+                if inp_type == 'radio' and inp.get('checked'):
+                    evaluation_data[name] = inp.get('value', '')
+                elif name not in evaluation_data:
+                    evaluation_data[name] = ''
+
         submit_url = 'http://192.168.16.207:9001/jxpgXsAction.do?oper=wjpg'
         headers2 = {
             'Host': '192.168.16.207:9001',
@@ -134,30 +183,6 @@ class URPClient:
             'Referer': 'http://192.168.16.207:9001/jxpgXsAction.do',
             'Upgrade-Insecure-Requests': '1',
             'Priority': 'u=4'
-        }
-        evaluation_data = {
-            'wjbm': questionnaire_id,
-            'bpr': evaluatee_id,
-            'pgnr': evaluation_content,
-            'xumanyzg': 'zg',
-            'wjbz': '',
-            '0000000005': '20_1',
-            '0000000007': '0_0',
-            '0000000008': '0_0',
-            '0000000011': '0_0',
-            '0000000012': '0_0',
-            '0000000013': '0_0',
-            '0000000018': '5_0.9',
-            '0000000019': '0_0',
-            '0000000014': '0_0',
-            '0000000006': '20_1',
-            '0000000002': '5_1',
-            '0000000003': '10_1',
-            '0000000017': '10_1',
-            '0000000020': '20_1',
-            '0000000015': '5_1',
-            '0000000016': '5_0.7',
-            'zgpj': ''
         }
         result = self.session.post(submit_url, data=evaluation_data, headers=headers2).text
         if "评估成功" in result:
