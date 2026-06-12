@@ -1,23 +1,24 @@
 # URP 教学评估自动化工具
 
-一个用于自动完成 URP 教务系统教学评估的 Python 工具。
+一个用于自动完成使用URP高校教务管理系统（University Resource Planning）的高校（如清华大学、河南大学、扬州大学、西华大学）教学评估的Python工具。
 
 ## 项目说明
 
-本项目从独立的网站项目中分离出来进行开源，有能力的开发者可以自行在本地部署运行。
-作者的网站www.meizhenxin.cn  可以查成绩学分绩点，课程表，也可以做教评等等等等，欢迎使用
+本项目在[原项目](https://github.com/dygzn/urp_pg)的基础上，将账号密码的填写改为手动，更方便帮助其他同学完成教学评估。
+原项目所使用的ddddocr不稳定且安装时容易出错，本项目去除ddddocr改为手动填写。
+完成评估后，还可以继续为其他同学继续评估。
 
 ## 功能特性
 
-- 🔐 自动登录 URP 教务系统
-- 🤖 自动识别验证码（基于 ddddocr）
+- 🔐 手动登录 URP 教务系统
+- 🤖 手动填写验证码
 - 📝 自动获取未评估课程列表
 - ⚡ 批量完成教学评估
 - 🔄 支持 Session 保持
 
 ## 环境要求
 
-- Python 3.7+
+- Python 3.10+ （只测试过3.13）
 - 可访问的 URP 教务系统
 
 ## 安装步骤
@@ -25,8 +26,8 @@
 1. 克隆项目到本地
 
 ```bash
-git clone https://github.com/dygzn/urp_pg.git
-cd urp_jxpg
+git clone https://github.com/fyihang/urp_pg.git
+cd urp_pg
 ```
 
 2. 安装依赖
@@ -36,81 +37,33 @@ pip install -r requirements.txt
 ```
 
 ## 使用方法
-main.py为经过优化但没有测试的版本，教学评估.py是没有优化但是肯定可用的完整版本
-1. 打开 `main.py` 文件
 
-2. 在文件末尾填入你的学号和密码：
-
-```python
-if __name__ == '__main__':
-    # 下方填学号
-    account = '你的学号'
-    # 下方填密码
-    password = '你的密码'
-
-    client = URPClient(account, password)
-    if client.login():
-        client.get_and_evaluate_courses()
-```
-
-3. 运行程序
+1. 运行程序
 
 ```bash
 python main.py
 ```
 
+2. 输入你的学号和密码
+
 ## 配置说明
 
 ### 修改目标服务器
 
-如果你的 URP 系统地址不是 `http://192.168.16.207:9001`，需要在代码中修改相应的 URL：
-
-- 登录地址：[main.py:19-20, 39](main.py#L19)
-- 评估列表地址：[main.py:53](main.py#L53)
-- 评估提交地址：[main.py:102, 124](main.py#L102)
+如果你的 URP 系统地址不是 `http://192.168.16.207:9001`，需要在代码中修改相应的 URL
 
 ### 自定义评估选项
 
-评估选项在 `submit_evaluation` 方法的 `evaluation_data` 字典中（[main.py:138-161](main.py#L138)），可根据实际需求修改评分。
+评估选项在 `submit_evaluation` 方法的 `evaluation_data` 字典中，可根据实际需求修改评分。
 
 ## 依赖说明
 
 - **requests**: HTTP 请求库
 - **beautifulsoup4**: HTML 解析库
-- **ddddocr**: 验证码识别库
 
 ## 常见问题
 
-### Q1: 运行时提示 `TypeError: DdddOcr.__init__() got an unexpected keyword argument 'show_ad'`
-
-**原因**：ddddocr 版本过低，不支持 `show_ad` 参数。
-
-**解决方法**：
-```bash
-pip install --upgrade ddddocr>=1.5.6
-```
-
-### Q2: ddddocr 1.6.x 版本出现导入错误
-
-**原因**：ddddocr 1.6.x 版本可能存在依赖问题。
-
-**解决方法**：
-- 方案 1：降级到稳定版本
-  ```bash
-  pip install ddddocr==1.5.6
-  ```
-- 方案 2：升级到最新版本
-  ```bash
-  pip install --upgrade ddddocr
-  ```
-
-### Q3: 验证码识别失败导致登录失败
-
-**原因**：OCR 识别准确率不是 100%。
-
-**解决方法**：重新运行程序即可，程序会自动获取新的验证码。
-
-### Q4: 评估提交失败
+### Q1: 评估提交失败
 
 **可能原因**：
 - 网络连接问题
@@ -157,7 +110,7 @@ pip install --upgrade ddddocr>=1.5.6
 
 ## 本地部署
 
-本项目已从原网站项目中独立分离，可完全在本地运行：
+本项目完全在本地运行：
 
 1. 确保 Python 环境已安装
 2. 安装所需依赖包
@@ -170,4 +123,4 @@ pip install --upgrade ddddocr>=1.5.6
 
 ## 免责声明
 
-使用本工具产生的一切后果由使用者自行承担，开发者不承担任何责任。请合理使用，遵守学校相关规定。
+使用本工具产生的一切后果由使用者自行承担，开发者不承担任何责任。请合理使用，遵守您所在学校相关规定。
